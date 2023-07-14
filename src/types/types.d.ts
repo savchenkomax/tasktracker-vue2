@@ -10,7 +10,7 @@ export type ITask = {
   description: string;
   firstName: string;
   lastName: string;
-  priority: number | null;
+  priority: number;
   dateOfCreation: string;
   dateOfCompletion: string;
 };
