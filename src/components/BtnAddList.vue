@@ -4,6 +4,7 @@
       <form @submit.prevent="onSubmit" class="form">
         <validation-provider v-slot="{ errors }" name="Name" rules="required">
           <v-text-field
+            class="input"
             v-model="listName"
             :error-messages="errors"
             label="Name"
@@ -71,5 +72,9 @@ export default defineComponent({
   display: flex;
   flex-direction: column;
   align-items: center;
+  .input {
+    min-width: 260px;
+    margin-top: 7px;
+  }
 }
 </style>

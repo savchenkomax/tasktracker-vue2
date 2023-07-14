@@ -68,6 +68,7 @@
               </template>
               <v-date-picker
                 v-model="form.dateOfCompletion"
+                :min="form.dateOfCreation"
                 @change="menu2 = false"
               ></v-date-picker>
             </v-menu>
@@ -111,7 +112,7 @@ import {
   setInteractionMode,
 } from "vee-validate";
 
-import { ITask } from "@/types/types";
+import { ITask, IModal } from "@/types/types";
 
 setInteractionMode("eager");
 
@@ -137,6 +138,7 @@ export default defineComponent({
 
   data: () => ({
     priorityItems: [1, 2, 3, 4, 5],
+    modalData: {} as IModal,
     menu2: false,
     form: {
       id: null,
@@ -146,13 +148,17 @@ export default defineComponent({
       firstName: "",
       lastName: "",
       priority: null,
-      dateOfCreation: "",
+      dateOfCreation: new Date(
+        Date.now() - new Date().getTimezoneOffset() * 60000
+      )
+        .toISOString()
+        .substr(0, 10),
       dateOfCompletion: "",
     },
   }),
 
   computed: {
-    ...mapGetters(["getIsVisible", "getTasks"]),
+    ...mapGetters(["getIsVisible", "getTasks", "getModalData"]),
 
     getDateOfCompletion(): string {
       return this.form.dateOfCompletion;
@@ -160,10 +166,11 @@ export default defineComponent({
   },
 
   methods: {
-    ...mapMutations(["setIsVisible"]),
+    ...mapMutations(["setIsVisible", "setModalData"]),
     ...mapActions(["setTaskLS"]),
 
     clearForm() {
+      this.setModalData({});
       const observer = this.$refs.observer as InstanceType<
         typeof ValidationObserver
       >;
@@ -176,28 +183,37 @@ export default defineComponent({
         firstName: "",
         lastName: "",
         priority: null,
-        dateOfCreation: "",
+        dateOfCreation: this.form.dateOfCreation,
         dateOfCompletion: "",
       });
     },
     onSubmit() {
-      const newTask: ITask = {
-        id: new Date().getTime(),
-        listId: this.listId,
-        name: this.form.name,
-        description: this.form.description,
-        firstName: this.form.firstName,
-        lastName: this.form.lastName,
-        priority: this.form.priority,
-        dateOfCreation: new Date(
-          Date.now() - new Date().getTimezoneOffset() * 60000
-        )
-          .toISOString()
-          .substr(0, 10),
-        dateOfCompletion: this.form.dateOfCompletion,
-      };
-      const tasks = this.getTasks;
-      tasks.push(newTask);
+      let tasks = this.getTasks;
+      const editTask = this.modalData.taskForEdit;
+      if (this.modalData.type === "create") {
+        const newTask: ITask = {
+          id: new Date().getTime(),
+          listId: this.listId,
+          name: this.form.name,
+          description: this.form.description,
+          firstName: this.form.firstName,
+          lastName: this.form.lastName,
+          priority: this.form.priority,
+          dateOfCreation: this.form.dateOfCreation,
+          dateOfCompletion: this.form.dateOfCompletion,
+        };
+        tasks.push(newTask);
+      } else {
+        tasks = tasks.map((el: ITask) => {
+          if (
+            this.modalData.taskForEdit &&
+            el.id === this.modalData.taskForEdit.id
+          ) {
+            return Object.assign(this.modalData.taskForEdit, this.form);
+          }
+          return el;
+        });
+      }
       this.setTaskLS(tasks);
       this.setIsVisible(false);
       this.clearForm();
@@ -209,6 +225,10 @@ export default defineComponent({
   },
   mounted() {
     this.$refs.observer;
+  },
+  updated() {
+    this.modalData = this.getModalData;
+    this.form = Object.assign(this.form, this.modalData.taskForEdit);
   },
 });
 </script>

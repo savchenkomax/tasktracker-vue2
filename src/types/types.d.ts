@@ -14,3 +14,8 @@ export type ITask = {
   dateOfCreation: string;
   dateOfCompletion: string;
 };
+
+export type IModal = {
+  type: string;
+  taskForEdit?: ITask;
+};

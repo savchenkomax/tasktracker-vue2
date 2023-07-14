@@ -19,16 +19,23 @@
       <draggable
         class="list-group"
         :list="getTasksforList(list.id)"
-        group="tasks"
+        v-bind="dragOptions"
+        @start="drag = true"
+        @end="drag = false"
         @change="log"
       >
-        <task-card
-          class="list-group-item"
-          v-for="task in getTasksforList(list.id)"
-          @deleteTask="deleteTask"
-          :task="task"
-          :key="task.id"
-        />
+        <transition-group type="transition" :name="!drag ? 'flip-list' : null">
+          <task-card
+            class="list-group-item"
+            v-for="task in getTasksforList(list.id)"
+            @deleteTask="deleteTask"
+            :task="task"
+            :key="task.id"
+            :class="task.fixed ? 'fa fa-anchor' : 'glyphicon glyphicon-pushpin'"
+            @click="task.fixed = !task.fixed"
+            aria-hidden="true"
+          />
+        </transition-group>
       </draggable>
     </div>
   </div>
@@ -56,10 +63,20 @@ export default defineComponent({
 
   data: () => ({
     tasks: [] as ITask[],
+    drag: false,
   }),
 
   computed: {
     ...mapGetters(["getTasksforList", "getTasks", "getAllLists"]),
+
+    dragOptions() {
+      return {
+        animation: 200,
+        group: "tasks",
+        disabled: false,
+        ghostClass: "ghost",
+      };
+    },
   },
 
   methods: {
@@ -125,7 +142,7 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .list {
-  width: 300px;
+  min-width: 300px;
   padding: 10px;
   &__title {
     border-bottom: solid 1px gray;
@@ -142,7 +159,35 @@ export default defineComponent({
     flex-flow: column-reverse;
     gap: 10px;
     justify-content: center;
-    padding: 20px 10px 0;
+    padding: 0 10px;
   }
+}
+.flip-list-move {
+  transition: transform 0.5s;
+}
+
+.no-move {
+  transition: transform 0s;
+}
+
+.ghost {
+  opacity: 0.5;
+  background: #c8ebfb;
+}
+
+.list-group {
+  min-height: 20px;
+  span {
+    display: block;
+    min-height: 20px;
+  }
+}
+
+.list-group-item {
+  cursor: move;
+}
+
+.list-group-item i {
+  cursor: pointer;
 }
 </style>

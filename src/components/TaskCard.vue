@@ -1,5 +1,5 @@
 <template>
-  <v-card class="mx-auto" width="300" max-height="250px">
+  <v-card class="task" width="300" max-height="250px">
     <v-card-text>
       <p>{{ task.name }}</p>
       <p>{{ fullName }}</p>
@@ -10,7 +10,7 @@
       <p>{{ allottedTime }}</p>
     </v-card-text>
     <v-card-actions class="card__actions">
-      <v-btn text color="deep-purple accent-4"> edit </v-btn>
+      <v-btn text color="deep-purple accent-4" @click="openModal"> edit </v-btn>
       <v-btn
         text
         color="red accent-4"
@@ -25,6 +25,7 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import { PropType } from "vue";
+import { mapMutations } from "vuex";
 
 import { ITask } from "@/types/types";
 
@@ -46,8 +47,17 @@ export default defineComponent({
     fullName(): string {
       return this.task.firstName + "" + this.task.lastName;
     },
-    allottedTime(): any {
+    allottedTime(): string {
       return this.task.dateOfCreation + "-" + this.task.dateOfCompletion;
+    },
+  },
+
+  methods: {
+    ...mapMutations(["setIsVisible", "setModalData"]),
+
+    openModal() {
+      this.setModalData({ type: "edit", taskForEdit: this.task });
+      this.setIsVisible(true);
     },
   },
 });
@@ -56,5 +66,8 @@ export default defineComponent({
 <style lang="scss" scoped>
 .card__actions {
   justify-content: space-between;
+}
+.task {
+  margin-top: 10px;
 }
 </style>

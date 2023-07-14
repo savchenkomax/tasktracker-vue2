@@ -1,6 +1,6 @@
 import Vue from "vue";
 import Vuex from "vuex";
-import { IList, ITask } from "@/types/types";
+import { IList, ITask, IModal } from "@/types/types";
 
 Vue.use(Vuex);
 
@@ -9,6 +9,7 @@ export default new Vuex.Store({
     lists: [] as IList[],
     tasks: [] as ITask[],
     isVisible: false,
+    modalData: {} as IModal,
   },
 
   getters: {
@@ -24,6 +25,9 @@ export default new Vuex.Store({
     getIsVisible(state): boolean {
       return state.isVisible;
     },
+    getModalData(state): IModal {
+      return state.modalData;
+    },
   },
 
   mutations: {
@@ -35,6 +39,9 @@ export default new Vuex.Store({
     },
     setIsVisible(state, payload: boolean) {
       state.isVisible = payload;
+    },
+    setModalData(state, payload: IModal) {
+      state.modalData = payload;
     },
   },
 
